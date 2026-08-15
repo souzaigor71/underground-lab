@@ -75,11 +75,12 @@ async function callProvider(provider: ProviderId, args: ChatArgs): Promise<strin
     throw new Error(`Falha na IA (${res.status}): ${text.slice(0, 200)}`);
   }
 
-  const json = (await res.json()) as Record<string, any>;
+  const json = (await res.json()) as any;
   const content =
     provider === "gemini"
       ? json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("")
       : json?.choices?.[0]?.message?.content;
+
 
   if (!content || typeof content !== "string") throw new RetryableError("Resposta vazia da IA");
   return content;
