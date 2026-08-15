@@ -14,7 +14,403 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          section_slug: string
+          section_title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          section_slug: string
+          section_title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          section_slug?: string
+          section_title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chapters: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          material_id: string
+          position: number
+          slug: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          material_id: string
+          position: number
+          slug: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          material_id?: string
+          position?: number
+          slug?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flashcards: {
+        Row: {
+          back: string
+          created_at: string
+          front: string
+          id: string
+          material_id: string
+          position: number
+          user_id: string
+        }
+        Insert: {
+          back: string
+          created_at?: string
+          front: string
+          id?: string
+          material_id: string
+          position?: number
+          user_id: string
+        }
+        Update: {
+          back?: string
+          created_at?: string
+          front?: string
+          id?: string
+          material_id?: string
+          position?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generation_jobs: {
+        Row: {
+          created_at: string
+          current_step: string
+          error: string | null
+          id: string
+          material_id: string
+          progress: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_step?: string
+          error?: string | null
+          id?: string
+          material_id: string
+          progress?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_step?: string
+          error?: string | null
+          id?: string
+          material_id?: string
+          progress?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_jobs_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          material_id: string
+          section_slug: string
+          section_title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          material_id: string
+          section_slug: string
+          section_title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          material_id?: string
+          section_slug?: string
+          section_title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          answer: string
+          explanation: string
+          id: string
+          is_correct: boolean | null
+          kind: string
+          options: Json
+          position: number
+          question: string
+          quiz_id: string
+          user_answer: string | null
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          explanation?: string
+          id?: string
+          is_correct?: boolean | null
+          kind: string
+          options?: Json
+          position: number
+          question: string
+          quiz_id: string
+          user_answer?: string | null
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          explanation?: string
+          id?: string
+          is_correct?: boolean | null
+          kind?: string
+          options?: Json
+          position?: number
+          question?: string
+          quiz_id?: string
+          user_answer?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          material_id: string
+          score: number | null
+          total: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          material_id: string
+          score?: number | null
+          total?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          material_id?: string
+          score?: number | null
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sources: {
+        Row: {
+          accessed_at: string
+          domain: string
+          id: string
+          material_id: string
+          title: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          domain: string
+          id?: string
+          material_id: string
+          title: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          domain?: string
+          id?: string
+          material_id?: string
+          title?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sources_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "study_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_materials: {
+        Row: {
+          created_at: string
+          focus: string
+          id: string
+          intro: string | null
+          level: string
+          minutes_studied: number
+          objectives: string | null
+          outline: Json
+          read_progress: number
+          size: string
+          status: string
+          title: string | null
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          focus?: string
+          id?: string
+          intro?: string | null
+          level?: string
+          minutes_studied?: number
+          objectives?: string | null
+          outline?: Json
+          read_progress?: number
+          size?: string
+          status?: string
+          title?: string | null
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          focus?: string
+          id?: string
+          intro?: string | null
+          level?: string
+          minutes_studied?: number
+          objectives?: string | null
+          outline?: Json
+          read_progress?: number
+          size?: string
+          status?: string
+          title?: string | null
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
