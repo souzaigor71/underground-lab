@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MeusEstudosRouteImport } from './routes/meus-estudos'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as EstudoIdRouteImport } from './routes/estudo.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const PainelRoute = PainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EstudoIdRoute = EstudoIdRouteImport.update({
+  id: '/estudo/$id',
+  path: '/estudo/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/meus-estudos': typeof MeusEstudosRoute
   '/painel': typeof PainelRoute
+  '/estudo/$id': typeof EstudoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/meus-estudos': typeof MeusEstudosRoute
   '/painel': typeof PainelRoute
+  '/estudo/$id': typeof EstudoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/meus-estudos': typeof MeusEstudosRoute
   '/painel': typeof PainelRoute
+  '/estudo/$id': typeof EstudoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/meus-estudos' | '/painel'
+  fullPaths: '/' | '/auth' | '/meus-estudos' | '/painel' | '/estudo/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/meus-estudos' | '/painel'
-  id: '__root__' | '/' | '/auth' | '/meus-estudos' | '/painel'
+  to: '/' | '/auth' | '/meus-estudos' | '/painel' | '/estudo/$id'
+  id: '__root__' | '/' | '/auth' | '/meus-estudos' | '/painel' | '/estudo/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   MeusEstudosRoute: typeof MeusEstudosRoute
   PainelRoute: typeof PainelRoute
+  EstudoIdRoute: typeof EstudoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/estudo/$id': {
+      id: '/estudo/$id'
+      path: '/estudo/$id'
+      fullPath: '/estudo/$id'
+      preLoaderRoute: typeof EstudoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   MeusEstudosRoute: MeusEstudosRoute,
   PainelRoute: PainelRoute,
+  EstudoIdRoute: EstudoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
