@@ -11,6 +11,7 @@ import {
   type Level,
   type Size,
 } from "./study.server";
+import { consumeCredits, isAdminUser } from "./credits.server";
 
 const createSchema = z.object({
   topic: z.string().trim().min(2).max(160),
