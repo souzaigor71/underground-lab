@@ -90,32 +90,71 @@ export type Database = {
           },
         ]
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       flashcards: {
         Row: {
           back: string
           created_at: string
+          due_at: string
+          ease: number
           front: string
           id: string
+          interval_days: number
+          last_reviewed_at: string | null
           material_id: string
           position: number
+          repetitions: number
           user_id: string
         }
         Insert: {
           back: string
           created_at?: string
+          due_at?: string
+          ease?: number
           front: string
           id?: string
+          interval_days?: number
+          last_reviewed_at?: string | null
           material_id: string
           position?: number
+          repetitions?: number
           user_id: string
         }
         Update: {
           back?: string
           created_at?: string
+          due_at?: string
+          ease?: number
           front?: string
           id?: string
+          interval_days?: number
+          last_reviewed_at?: string | null
           material_id?: string
           position?: number
+          repetitions?: number
           user_id?: string
         }
         Relationships: [
@@ -363,6 +402,8 @@ export type Database = {
           focus: string
           id: string
           intro: string | null
+          last_chapter: number
+          last_tab: string
           level: string
           minutes_studied: number
           objectives: string | null
@@ -380,6 +421,8 @@ export type Database = {
           focus?: string
           id?: string
           intro?: string | null
+          last_chapter?: number
+          last_tab?: string
           level?: string
           minutes_studied?: number
           objectives?: string | null
@@ -397,6 +440,8 @@ export type Database = {
           focus?: string
           id?: string
           intro?: string | null
+          last_chapter?: number
+          last_tab?: string
           level?: string
           minutes_studied?: number
           objectives?: string | null
@@ -411,15 +456,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          balance: number
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -546,6 +639,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
