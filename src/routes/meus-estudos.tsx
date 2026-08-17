@@ -41,7 +41,10 @@ function MyStudies() {
 
   async function remove(id: string) {
     const { error } = await supabase.from("study_materials").delete().eq("id", id);
-    if (error) return toast.error("Não foi possível excluir.");
+    if (error) {
+      toast.error("Não foi possível excluir.");
+      return;
+    }
     toast.success("Apostila excluída.");
     void qc.invalidateQueries({ queryKey: ["materials"] });
   }
@@ -52,7 +55,10 @@ function MyStudies() {
       supabase.from("chapters").select("title, content").eq("material_id", id).order("position"),
       supabase.from("sources").select("title, domain, url, accessed_at").eq("material_id", id),
     ]);
-    if (!material) return toast.error("Apostila não encontrada.");
+    if (!material) {
+      toast.error("Apostila não encontrada.");
+      return;
+    }
     const md = buildMarkdown(material, chapters ?? [], sources ?? []);
     downloadFile(`${material.title ?? material.topic}.md`, md, "text/markdown");
   }
