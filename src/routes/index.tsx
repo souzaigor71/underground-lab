@@ -242,10 +242,10 @@ function Index() {
 
             <Button
               onClick={start}
-              disabled={authLoading}
+              disabled={authLoading || credits.blocked}
               className="mt-8 h-14 w-full font-mono text-base tracking-[0.2em] shadow-[var(--shadow-neon)]"
             >
-              GERAR APOSTILA
+              {credits.blocked ? "SEM CRÉDITOS — RECARREGUE" : "GERAR APOSTILA"}
             </Button>
             {!user && !authLoading && (
               <p className="mt-3 text-center text-xs text-muted-foreground">
