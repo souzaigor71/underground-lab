@@ -19,12 +19,14 @@ import {
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Markdown } from "@/components/Markdown";
+import { ExportDialog } from "@/components/ExportDialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { buildMarkdown, downloadFile, exportPdf } from "@/lib/export";
+import { exportPdf } from "@/lib/export";
+import { formatDue, GRADES, scheduleCard, type SrsGrade } from "@/lib/srs";
 import { generateFlashcards, generateQuiz } from "@/lib/study.functions";
 
 export const Route = createFileRoute("/estudo/$id")({
