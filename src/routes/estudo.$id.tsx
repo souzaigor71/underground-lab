@@ -28,6 +28,7 @@ import { buildMarkdown, downloadFile, exportPdf } from "@/lib/export";
 import { generateFlashcards, generateQuiz } from "@/lib/study.functions";
 
 export const Route = createFileRoute("/estudo/$id")({
+  validateSearch: (search: Record<string, unknown>) => ({ inicio: search['inicio'] === true || search['inicio'] === "true" }),
   head: () => ({
     meta: [
       { title: "Apostila de estudo — Instituto Underground" },
@@ -40,14 +41,17 @@ export const Route = createFileRoute("/estudo/$id")({
 });
 
 type Tab = "leitura" | "quiz" | "flashcards" | "anotacoes";
+const TABS: Tab[] = ["leitura", "quiz", "flashcards", "anotacoes"];
 
 function StudyReader() {
   const { id } = Route.useParams();
+  const { inicio } = Route.useSearch();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("leitura");
   const [current, setCurrent] = useState(0);
   const [sidebar, setSidebar] = useState(false);
+  const [resumed, setResumed] = useState(false);
   const startedAt = useRef(Date.now());
 
   const { data, isLoading } = useQuery({
