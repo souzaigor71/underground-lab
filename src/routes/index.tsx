@@ -4,10 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Check, CircleDashed, Loader2, Sparkles, TriangleAlert } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { CreditsBar } from "@/components/CreditsBar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/useAuth";
+import { useCredits } from "@/lib/useCredits";
 import { createStudyMaterial, finalizeMaterial, generateChapter } from "@/lib/study.functions";
 
 export const Route = createFileRoute("/")({
