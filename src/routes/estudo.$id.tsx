@@ -82,18 +82,31 @@ function StudyReader() {
   const chapter = chapters[current];
   const progress = chapters.length ? Math.round(((current + 1) / chapters.length) * 100) : 0;
 
-  // Persiste progresso de leitura e tempo estudado.
+  // Retoma exatamente de onde parou (capítulo + aba), salvo quando pedido "do início".
   useEffect(() => {
-    if (!material || !chapters.length) return;
+    if (resumed || !material || !chapters.length) return;
+    setResumed(true);
+    if (inicio) return;
+    const last = Math.min(Math.max(material.last_chapter ?? 0, 0), chapters.length - 1);
+    setCurrent(last);
+    const savedTab = material.last_tab as Tab;
+    if (TABS.includes(savedTab)) setTab(savedTab);
+  }, [material, chapters.length, inicio, resumed]);
+
+  // Persiste progresso de leitura, posição atual e tempo estudado.
+  useEffect(() => {
+    if (!material || !chapters.length || !resumed) return;
     const minutes = Math.round((Date.now() - startedAt.current) / 60000);
     void supabase
       .from("study_materials")
       .update({
         read_progress: Math.max(progress, material.read_progress ?? 0),
         minutes_studied: (material.minutes_studied ?? 0) + (minutes > 0 ? 1 : 0),
+        last_chapter: current,
+        last_tab: tab,
       })
       .eq("id", id);
-  }, [current, chapters.length, id, material, progress]);
+  }, [current, tab, chapters.length, id, material, progress, resumed]);
 
   if (isLoading) {
     return (
