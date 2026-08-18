@@ -154,7 +154,11 @@ function Index() {
       toast.error("Informe um assunto para estudar.");
       return;
     }
-    void run();
+    if (credits.blocked) {
+      toast.error("Seus créditos acabaram. Recarregue para gerar novas apostilas.");
+      return;
+    }
+    void run().then(() => credits.refresh());
   }
 
   const processing = running || failed || steps.length > 0;
