@@ -195,16 +195,19 @@ function StudyReader() {
               <Button size="sm" variant="outline" className="lg:hidden" onClick={() => setSidebar(true)}>
                 <Layers className="size-3.5" /> Sumário
               </Button>
-              <Button size="sm" variant="outline" onClick={exportMarkdown}>
-                <FileText className="size-3.5" /> Markdown
+              <Button size="sm" onClick={() => exportPdf(material, chapters, data?.sources ?? [])}>
+                <Download className="size-3.5" /> Baixar PDF
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => exportPdf(material, chapters, data?.sources ?? [])}
-              >
-                <Download className="size-3.5" /> PDF
-              </Button>
+              <ExportDialog
+                material={material}
+                chapters={chapters}
+                sources={data?.sources ?? []}
+                trigger={
+                  <Button size="sm" variant="outline">
+                    <FileText className="size-3.5" /> Exportar partes
+                  </Button>
+                }
+              />
               <Button size="sm" variant="ghost" onClick={toggleBookmark}>
                 <Bookmark
                   className={`size-3.5 ${chapter && isBookmarked(chapter.slug) ? "fill-primary text-primary" : ""}`}
