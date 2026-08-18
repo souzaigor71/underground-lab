@@ -136,10 +136,6 @@ function StudyReader() {
     void qc.invalidateQueries({ queryKey: ["material", id] });
   }
 
-  function exportMarkdown() {
-    const md = buildMarkdown(material!, chapters, data?.sources ?? []);
-    downloadFile(`${material!.title ?? material!.topic}.md`, md, "text/markdown");
-  }
 
   return (
     <Shell>
