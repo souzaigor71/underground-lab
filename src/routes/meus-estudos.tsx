@@ -1,13 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { BookOpen, Download, Trash2 } from "lucide-react";
+import { BookOpen, Play, Search, Trash2 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { ExportDialog } from "@/components/ExportDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { buildMarkdown, downloadFile } from "@/lib/export";
+import type { ExportChapter, ExportMaterial, ExportSource } from "@/lib/export";
 
 export const Route = createFileRoute("/meus-estudos")({
   head: () => ({
@@ -25,6 +28,7 @@ function MyStudies() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [term, setTerm] = useState("");
 
   const { data: materials = [] } = useQuery({
     queryKey: ["materials", user?.id],
@@ -32,12 +36,18 @@ function MyStudies() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("study_materials")
-        .select("id, topic, title, level, status, read_progress, outline, created_at")
+        .select("id, topic, title, level, status, read_progress, outline, created_at, last_chapter, last_tab")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
+
+  const filtered = useMemo(() => {
+    const q = term.trim().toLowerCase();
+    if (!q) return materials;
+    return materials.filter((m) => `${m.title ?? ""} ${m.topic} ${m.level}`.toLowerCase().includes(q));
+  }, [materials, term]);
 
   async function remove(id: string) {
     const { error } = await supabase.from("study_materials").delete().eq("id", id);
@@ -47,20 +57,6 @@ function MyStudies() {
     }
     toast.success("Apostila excluída.");
     void qc.invalidateQueries({ queryKey: ["materials"] });
-  }
-
-  async function exportMd(id: string) {
-    const [{ data: material }, { data: chapters }, { data: sources }] = await Promise.all([
-      supabase.from("study_materials").select("*").eq("id", id).single(),
-      supabase.from("chapters").select("title, content").eq("material_id", id).order("position"),
-      supabase.from("sources").select("title, domain, url, accessed_at").eq("material_id", id),
-    ]);
-    if (!material) {
-      toast.error("Apostila não encontrada.");
-      return;
-    }
-    const md = buildMarkdown(material, chapters ?? [], sources ?? []);
-    downloadFile(`${material.title ?? material.topic}.md`, md, "text/markdown");
   }
 
   if (!loading && !user) {
@@ -83,16 +79,28 @@ function MyStudies() {
         <h1 className="font-mono text-xl tracking-[0.15em] text-neon">MEUS ESTUDOS</h1>
         <p className="mt-2 text-sm text-muted-foreground">Todas as apostilas que você já gerou.</p>
 
-        {materials.length === 0 ? (
+        <div className="relative mt-6 max-w-md">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            placeholder="Buscar por assunto, título ou nível..."
+            className="pl-9"
+          />
+        </div>
+
+        {filtered.length === 0 ? (
           <div className="panel mt-8 p-10 text-center">
-            <p className="text-sm text-muted-foreground">Nenhuma apostila ainda.</p>
+            <p className="text-sm text-muted-foreground">
+              {materials.length === 0 ? "Nenhuma apostila ainda." : "Nada encontrado para esta busca."}
+            </p>
             <Link to="/">
               <Button className="mt-4 font-mono tracking-wide">GERAR APOSTILA</Button>
             </Link>
           </div>
         ) : (
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {materials.map((m) => {
+            {filtered.map((m) => {
               const chapters = Array.isArray(m.outline) ? m.outline.length : 0;
               return (
                 <article key={m.id} className="panel p-5 transition-colors hover:border-primary/50">
@@ -117,15 +125,21 @@ function MyStudies() {
                     </div>
                     <Progress value={m.read_progress} className="mt-1" />
                   </div>
+                  <p className="mt-2 font-mono text-[11px] text-muted-foreground">
+                    Retoma em: capítulo {(m.last_chapter ?? 0) + 1} · {m.last_tab ?? "leitura"}
+                  </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link to="/estudo/$id" params={{ id: m.id }}>
                       <Button size="sm" className="font-mono text-xs tracking-wide">
-                        <BookOpen className="size-3.5" /> CONTINUAR
+                        <Play className="size-3.5" /> CONTINUAR ESTUDO
                       </Button>
                     </Link>
-                    <Button size="sm" variant="outline" onClick={() => exportMd(m.id)}>
-                      <Download className="size-3.5" /> Markdown
-                    </Button>
+                    <Link to="/estudo/$id" params={{ id: m.id }} search={{ inicio: true }}>
+                      <Button size="sm" variant="ghost">
+                        <BookOpen className="size-3.5" /> Do início
+                      </Button>
+                    </Link>
+                    <MaterialExport id={m.id} />
                     <Button size="sm" variant="ghost" onClick={() => remove(m.id)}>
                       <Trash2 className="size-3.5" /> Excluir
                     </Button>
@@ -138,4 +152,32 @@ function MyStudies() {
       </div>
     </Shell>
   );
+}
+
+export function MaterialExport({ id }: { id: string }) {
+  const { data } = useQuery({
+    queryKey: ["export-data", id],
+    queryFn: async () => {
+      const [{ data: material }, { data: chapters }, { data: sources }] = await Promise.all([
+        supabase.from("study_materials").select("title, topic, level, intro, objectives").eq("id", id).single(),
+        supabase.from("chapters").select("id, title, content").eq("material_id", id).order("position"),
+        supabase.from("sources").select("title, domain, url, accessed_at").eq("material_id", id),
+      ]);
+      return {
+        material: material as ExportMaterial | null,
+        chapters: (chapters ?? []) as (ExportChapter & { id: string })[],
+        sources: (sources ?? []) as ExportSource[],
+      };
+    },
+  });
+
+  if (!data?.material) {
+    return (
+      <Button size="sm" variant="outline" disabled>
+        Exportar
+      </Button>
+    );
+  }
+
+  return <ExportDialog material={data.material} chapters={data.chapters} sources={data.sources} />;
 }
