@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 const NAV = [
   { to: "/", label: "Gerador" },
   { to: "/meus-estudos", label: "Meus estudos" },
+  { to: "/historico", label: "Histórico" },
   { to: "/painel", label: "Meu aprendizado" },
 ] as const;
 

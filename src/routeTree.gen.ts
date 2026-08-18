@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as MeusEstudosRouteImport } from './routes/meus-estudos'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as EstudoIdRouteImport } from './routes/estudo.$id'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoRoute = HistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeusEstudosRoute = MeusEstudosRouteImport.update({
@@ -44,6 +50,7 @@ const EstudoIdRoute = EstudoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/historico': typeof HistoricoRoute
   '/meus-estudos': typeof MeusEstudosRoute
   '/painel': typeof PainelRoute
   '/estudo/$id': typeof EstudoIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/historico': typeof HistoricoRoute
   '/meus-estudos': typeof MeusEstudosRoute
   '/painel': typeof PainelRoute
   '/estudo/$id': typeof EstudoIdRoute
@@ -59,21 +67,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/historico': typeof HistoricoRoute
   '/meus-estudos': typeof MeusEstudosRoute
   '/painel': typeof PainelRoute
   '/estudo/$id': typeof EstudoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/meus-estudos' | '/painel' | '/estudo/$id'
+  fullPaths:
+    '/' | '/auth' | '/historico' | '/meus-estudos' | '/painel' | '/estudo/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/meus-estudos' | '/painel' | '/estudo/$id'
-  id: '__root__' | '/' | '/auth' | '/meus-estudos' | '/painel' | '/estudo/$id'
+  to: '/' | '/auth' | '/historico' | '/meus-estudos' | '/painel' | '/estudo/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/historico'
+    | '/meus-estudos'
+    | '/painel'
+    | '/estudo/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  HistoricoRoute: typeof HistoricoRoute
   MeusEstudosRoute: typeof MeusEstudosRoute
   PainelRoute: typeof PainelRoute
   EstudoIdRoute: typeof EstudoIdRoute
@@ -93,6 +111,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico': {
+      id: '/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof HistoricoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meus-estudos': {
@@ -122,6 +147,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  HistoricoRoute: HistoricoRoute,
   MeusEstudosRoute: MeusEstudosRoute,
   PainelRoute: PainelRoute,
   EstudoIdRoute: EstudoIdRoute,
