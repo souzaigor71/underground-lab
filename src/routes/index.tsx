@@ -182,6 +182,11 @@ function Index() {
       </section>
 
       <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        {user && (
+          <div className="mb-6">
+            <CreditsBar />
+          </div>
+        )}
         {!processing ? (
           <div className="panel p-5 shadow-[var(--shadow-panel)] sm:p-8">
             <label htmlFor="topic" className="font-mono text-sm tracking-wide text-primary">
