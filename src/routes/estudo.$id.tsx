@@ -28,7 +28,8 @@ import { buildMarkdown, downloadFile, exportPdf } from "@/lib/export";
 import { generateFlashcards, generateQuiz } from "@/lib/study.functions";
 
 export const Route = createFileRoute("/estudo/$id")({
-  validateSearch: (search: Record<string, unknown>) => ({ inicio: search['inicio'] === true || search['inicio'] === "true" }),
+  validateSearch: (search: Record<string, unknown>): { inicio?: boolean } =>
+    search['inicio'] === true || search['inicio'] === "true" ? { inicio: true } : {},
   head: () => ({
     meta: [
       { title: "Apostila de estudo — Instituto Underground" },
