@@ -64,6 +64,7 @@ type Step = { key: string; label: string; state: StepState };
 function Index() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const credits = useCredits();
   const create = useServerFn(createStudyMaterial);
   const chapter = useServerFn(generateChapter);
   const finalize = useServerFn(finalizeMaterial);
