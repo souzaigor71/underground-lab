@@ -19,15 +19,19 @@ import {
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { Markdown } from "@/components/Markdown";
+import { ExportDialog } from "@/components/ExportDialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { buildMarkdown, downloadFile, exportPdf } from "@/lib/export";
+import { exportPdf } from "@/lib/export";
+import { formatDue, GRADES, scheduleCard, type SrsGrade } from "@/lib/srs";
 import { generateFlashcards, generateQuiz } from "@/lib/study.functions";
 
 export const Route = createFileRoute("/estudo/$id")({
+  validateSearch: (search: Record<string, unknown>): { inicio?: boolean } =>
+    search['inicio'] === true || search['inicio'] === "true" ? { inicio: true } : {},
   head: () => ({
     meta: [
       { title: "Apostila de estudo — Instituto Underground" },
@@ -40,14 +44,17 @@ export const Route = createFileRoute("/estudo/$id")({
 });
 
 type Tab = "leitura" | "quiz" | "flashcards" | "anotacoes";
+const TABS: Tab[] = ["leitura", "quiz", "flashcards", "anotacoes"];
 
 function StudyReader() {
   const { id } = Route.useParams();
+  const { inicio } = Route.useSearch();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("leitura");
   const [current, setCurrent] = useState(0);
   const [sidebar, setSidebar] = useState(false);
+  const [resumed, setResumed] = useState(false);
   const startedAt = useRef(Date.now());
 
   const { data, isLoading } = useQuery({
@@ -75,18 +82,31 @@ function StudyReader() {
   const chapter = chapters[current];
   const progress = chapters.length ? Math.round(((current + 1) / chapters.length) * 100) : 0;
 
-  // Persiste progresso de leitura e tempo estudado.
+  // Retoma exatamente de onde parou (capítulo + aba), salvo quando pedido "do início".
   useEffect(() => {
-    if (!material || !chapters.length) return;
+    if (resumed || !material || !chapters.length) return;
+    setResumed(true);
+    if (inicio) return;
+    const last = Math.min(Math.max(material.last_chapter ?? 0, 0), chapters.length - 1);
+    setCurrent(last);
+    const savedTab = material.last_tab as Tab;
+    if (TABS.includes(savedTab)) setTab(savedTab);
+  }, [material, chapters.length, inicio, resumed]);
+
+  // Persiste progresso de leitura, posição atual e tempo estudado.
+  useEffect(() => {
+    if (!material || !chapters.length || !resumed) return;
     const minutes = Math.round((Date.now() - startedAt.current) / 60000);
     void supabase
       .from("study_materials")
       .update({
         read_progress: Math.max(progress, material.read_progress ?? 0),
         minutes_studied: (material.minutes_studied ?? 0) + (minutes > 0 ? 1 : 0),
+        last_chapter: current,
+        last_tab: tab,
       })
       .eq("id", id);
-  }, [current, chapters.length, id, material, progress]);
+  }, [current, tab, chapters.length, id, material, progress, resumed]);
 
   if (isLoading) {
     return (
@@ -129,10 +149,6 @@ function StudyReader() {
     void qc.invalidateQueries({ queryKey: ["material", id] });
   }
 
-  function exportMarkdown() {
-    const md = buildMarkdown(material!, chapters, data?.sources ?? []);
-    downloadFile(`${material!.title ?? material!.topic}.md`, md, "text/markdown");
-  }
 
   return (
     <Shell>
@@ -190,16 +206,19 @@ function StudyReader() {
               <Button size="sm" variant="outline" className="lg:hidden" onClick={() => setSidebar(true)}>
                 <Layers className="size-3.5" /> Sumário
               </Button>
-              <Button size="sm" variant="outline" onClick={exportMarkdown}>
-                <FileText className="size-3.5" /> Markdown
+              <Button size="sm" onClick={() => exportPdf(material, chapters, data?.sources ?? [])}>
+                <Download className="size-3.5" /> Baixar PDF
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => exportPdf(material, chapters, data?.sources ?? [])}
-              >
-                <Download className="size-3.5" /> PDF
-              </Button>
+              <ExportDialog
+                material={material}
+                chapters={chapters}
+                sources={data?.sources ?? []}
+                trigger={
+                  <Button size="sm" variant="outline">
+                    <FileText className="size-3.5" /> Exportar partes
+                  </Button>
+                }
+              />
               <Button size="sm" variant="ghost" onClick={toggleBookmark}>
                 <Bookmark
                   className={`size-3.5 ${chapter && isBookmarked(chapter.slug) ? "fill-primary text-primary" : ""}`}

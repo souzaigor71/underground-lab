@@ -4,10 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Check, CircleDashed, Loader2, Sparkles, TriangleAlert } from "lucide-react";
 import { Shell } from "@/components/Shell";
+import { CreditsBar } from "@/components/CreditsBar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/useAuth";
+import { useCredits } from "@/lib/useCredits";
 import { createStudyMaterial, finalizeMaterial, generateChapter } from "@/lib/study.functions";
 
 export const Route = createFileRoute("/")({
@@ -62,6 +64,7 @@ type Step = { key: string; label: string; state: StepState };
 function Index() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const credits = useCredits();
   const create = useServerFn(createStudyMaterial);
   const chapter = useServerFn(generateChapter);
   const finalize = useServerFn(finalizeMaterial);
@@ -152,7 +155,11 @@ function Index() {
       toast.error("Informe um assunto para estudar.");
       return;
     }
-    void run();
+    if (credits.blocked) {
+      toast.error("Seus créditos acabaram. Recarregue para gerar novas apostilas.");
+      return;
+    }
+    void run().then(() => credits.refresh());
   }
 
   const processing = running || failed || steps.length > 0;
@@ -175,6 +182,11 @@ function Index() {
       </section>
 
       <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        {user && (
+          <div className="mb-6">
+            <CreditsBar />
+          </div>
+        )}
         {!processing ? (
           <div className="panel p-5 shadow-[var(--shadow-panel)] sm:p-8">
             <label htmlFor="topic" className="font-mono text-sm tracking-wide text-primary">
@@ -235,10 +247,10 @@ function Index() {
 
             <Button
               onClick={start}
-              disabled={authLoading}
+              disabled={authLoading || credits.blocked}
               className="mt-8 h-14 w-full font-mono text-base tracking-[0.2em] shadow-[var(--shadow-neon)]"
             >
-              GERAR APOSTILA
+              {credits.blocked ? "SEM CRÉDITOS — RECARREGUE" : "GERAR APOSTILA"}
             </Button>
             {!user && !authLoading && (
               <p className="mt-3 text-center text-xs text-muted-foreground">

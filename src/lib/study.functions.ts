@@ -24,8 +24,13 @@ export const createStudyMaterial = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { supabase, userId, claims } = context;
     const sections = sectionsFor(data.level as Level, data.size as Size);
+
+    // Créditos: administradores geram sem consumir saldo.
+    const email = typeof claims?.email === "string" ? claims.email : null;
+    const admin = await isAdminUser(supabase, userId, email);
+    if (!admin) await consumeCredits(supabase, userId, 1, `Geração: ${data.topic}`);
 
     const { data: material, error } = await supabase
       .from("study_materials")
